@@ -123,8 +123,8 @@ event_loop(struct scrcpy *s, bool has_screen) {
                 }
                 return SCRCPY_EXIT_DISCONNECTED;
             case SC_EVENT_DEMUXER_ERROR:
-                LOGE("Demuxer error");
-                return SCRCPY_EXIT_FAILURE;
+                LOGW("Demuxer error");
+                break;
             case SC_EVENT_CONTROLLER_ERROR:
                 LOGE("Controller error");
                 return SCRCPY_EXIT_FAILURE;
@@ -459,8 +459,9 @@ scrcpy(struct scrcpy_options *options) {
 
     if (options->audio_playback) {
         if (!SDL_Init(SDL_INIT_AUDIO)) {
-            LOGE("Could not initialize SDL audio: %s", SDL_GetError());
-            goto end;
+            LOGW("SDL audio not available, continuing without audio: %s",
+                 SDL_GetError());
+            options->audio_playback = false;
         }
     }
 

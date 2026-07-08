@@ -196,6 +196,13 @@ executable('scrcpy', src,
            install: true,
            c_args: [])
 
+executable('scrcpyw', src,
+           dependencies: dependencies,
+           include_directories: src_dir,
+           install: true,
+           win_subsystem: 'windows',
+           c_args: [])
+
 # <https://mesonbuild.com/Builtin-options.html#directories>
 datadir = get_option('datadir') # by default 'share'
 

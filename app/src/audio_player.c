@@ -42,6 +42,11 @@ sc_audio_player_frame_sink_push(struct sc_frame_sink *sink,
                                 const AVFrame *frame) {
     struct sc_audio_player *ap = DOWNCAST(sink);
 
+    // Audio device not available, silently skip
+    if (!ap->stream) {
+        return false;
+    }
+
     return sc_audio_regulator_push(&ap->audioreg, frame);
 }
 
@@ -111,7 +116,7 @@ sc_audio_player_frame_sink_open(struct sc_frame_sink *sink,
                                            &spec,
                                            sc_audio_player_stream_callback, ap);
     if (!ap->stream) {
-        LOGE("Could not open audio device: %s", SDL_GetError());
+        LOGW("Audio device not available, audio disabled: %s", SDL_GetError());
         free(ap->aout_buffer);
         sc_audio_regulator_destroy(&ap->audioreg);
         return false;
