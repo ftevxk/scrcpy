@@ -6,6 +6,7 @@ on:
     paths:
       - 'app/**'
       - 'release/**'
+      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       name:
