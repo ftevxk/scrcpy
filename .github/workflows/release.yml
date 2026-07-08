@@ -1,6 +1,11 @@
 name: Build
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - 'app/**'
+      - 'release/**'
   workflow_dispatch:
     inputs:
       name:
