@@ -170,6 +170,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
     (void) lpCmdLine;
     (void) nCmdShow;
 
+    FreeConsole();
+
     int wargc;
     wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
     if (!wargv) {
