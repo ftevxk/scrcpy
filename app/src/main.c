@@ -159,3 +159,52 @@ main(int argc, char *argv[]) {
     return ret;
 #endif
 }
+
+#ifdef SCRCPYW
+#include <windows.h>
+
+int WINAPI
+WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    (void) hInstance;
+    (void) hPrevInstance;
+    (void) lpCmdLine;
+    (void) nCmdShow;
+
+    int wargc;
+    wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    if (!wargv) {
+        LOG_OOM();
+        return SCRCPY_EXIT_FAILURE;
+    }
+
+    char **argv_utf8 = malloc((wargc + 1) * sizeof(*argv_utf8));
+    if (!argv_utf8) {
+        LOG_OOM();
+        LocalFree(wargv);
+        return SCRCPY_EXIT_FAILURE;
+    }
+
+    argv_utf8[wargc] = NULL;
+    for (int i = 0; i < wargc; ++i) {
+        argv_utf8[i] = sc_str_from_wchars(wargv[i]);
+        if (!argv_utf8[i]) {
+            LOG_OOM();
+            for (int j = 0; j < i; ++j) {
+                free(argv_utf8[j]);
+            }
+            LocalFree(wargv);
+            free(argv_utf8);
+            return SCRCPY_EXIT_FAILURE;
+        }
+    }
+    LocalFree(wargv);
+
+    int ret = main_scrcpy(wargc, argv_utf8);
+
+    for (int i = 0; i < wargc; ++i) {
+        free(argv_utf8[i]);
+    }
+    free(argv_utf8);
+    return ret;
+}
+#endif
