@@ -86,8 +86,13 @@ if host_machine.system() == 'windows'
     # Compile the resource file twice: once without SCRCPYW for scrcpy.exe
     # (no embedded binaries, smaller), once with SCRCPYW for scrcpyw.exe
     # (embeds adb.exe + scrcpy-server for single-file distribution).
+    # A copy is needed because compile_resources() creates a target named
+    # after the source file; calling it twice with the same name conflicts.
     scrcpy_rc = windows.compile_resources('scrcpy-windows.rc')
-    scrcpyw_rc = windows.compile_resources('scrcpy-windows.rc',
+    scrcpyw_rc_src = configure_file(input: 'scrcpy-windows.rc',
+                                     output: 'scrcpyw-windows.rc',
+                                     copy: true)
+    scrcpyw_rc = windows.compile_resources(scrcpyw_rc_src,
                                            args: ['--define', 'SCRCPYW'])
     feature_test_macros += [
         '-D_WIN32_WINNT=0x0600',
