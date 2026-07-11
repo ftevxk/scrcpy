@@ -86,14 +86,25 @@ if host_machine.system() == 'windows'
     # Compile the resource file twice: once without SCRCPYW for scrcpy.exe
     # (no embedded binaries, smaller), once with SCRCPYW for scrcpyw.exe
     # (embeds adb.exe + scrcpy-server for single-file distribution).
-    # A copy is needed because compile_resources() creates a target named
-    # after the source file; calling it twice with the same name conflicts.
+    # compile_resources() names its target after the source file, so two
+    # calls with the same rc file conflict. For the SCRCPYW variant we use
+    # a custom_target so we can give it a distinct output object name while
+    # still running windres with the original source (so that "data/icon.ico"
+    # and other paths inside the rc file resolve relative to app/).
     scrcpy_rc = windows.compile_resources('scrcpy-windows.rc')
-    scrcpyw_rc_src = configure_file(input: 'scrcpy-windows.rc',
-                                     output: 'scrcpyw-windows.rc',
-                                     copy: true)
-    scrcpyw_rc = windows.compile_resources(scrcpyw_rc_src,
-                                           args: ['--define', 'SCRCPYW'])
+    windres_prog = find_program('x86_64-w64-mingw32-windres', required: false)
+    if not windres_prog.found()
+      windres_prog = find_program('i686-w64-mingw32-windres', required: false)
+    endif
+    if not windres_prog.found()
+      windres_prog = find_program('windres', required: true)
+    endif
+    scrcpyw_rc = custom_target('scrcpyw-windows',
+                               input: 'scrcpy-windows.rc',
+                               output: 'scrcpyw-windows.o',
+                               command: [windres_prog,
+                                         '--define', 'SCRCPYW',
+                                         '@INPUT@', '@OUTPUT@'])
     feature_test_macros += [
         '-D_WIN32_WINNT=0x0600',
         '-DWINVER=0x0600',
