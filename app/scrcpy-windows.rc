@@ -27,16 +27,17 @@ END
 // meson invokes the resource compiler. They are extracted to %TEMP% at
 // runtime by scrcpyw and removed on exit.
 //
-// Resource names are strings (not numeric IDs) so that main.c can look them
-// up via FindResourceW(NULL, L"<name>", RT_RCDATA) without a shared header.
+// Numeric resource IDs are used because GNU windres has bugs parsing string
+// resource names. main.c looks them up via FindResourceW(NULL,
+// MAKEINTRESOURCEW(ID), RT_RCDATA). IDs must stay in sync with the
+// SC_RES_ID_* constants in main.c.
 //
 // Guarded by SCRCPYW so that scrcpy.exe (console build) does not embed the
 // binaries and stays small; only scrcpyw.exe (GUI build) gets the embedded
-// payloads. The resource compiler receives --define SCRCPYW for scrcpyw via
-// meson.build extra_args.
+// payloads.
 #ifdef SCRCPYW
-"SC_ADB_EXE"            RCDATA "data/adb.exe"
-"SC_ADB_WIN_API_DLL"    RCDATA "data/AdbWinApi.dll"
-"SC_ADB_WIN_USB_DLL"    RCDATA "data/AdbWinUsbApi.dll"
-"SC_SCRCPY_SERVER"      RCDATA "data/scrcpy-server"
+101 RCDATA "data/adb.exe"
+102 RCDATA "data/AdbWinApi.dll"
+103 RCDATA "data/AdbWinUsbApi.dll"
+104 RCDATA "data/scrcpy-server"
 #endif

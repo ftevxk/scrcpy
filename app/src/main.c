@@ -285,13 +285,13 @@ scrcpyw_extract_embedded_binaries(void) {
     }
 
     struct {
-        const wchar_t *res;
+        WORD res_id;
         const char *name;
     } items[] = {
-        { L"SC_ADB_EXE",         "adb.exe" },
-        { L"SC_ADB_WIN_API_DLL", "AdbWinApi.dll" },
-        { L"SC_ADB_WIN_USB_DLL", "AdbWinUsbApi.dll" },
-        { L"SC_SCRCPY_SERVER",   "scrcpy-server" },
+        { SC_RES_ID_ADB_EXE,         "adb.exe" },
+        { SC_RES_ID_ADB_WIN_API_DLL, "AdbWinApi.dll" },
+        { SC_RES_ID_ADB_WIN_USB_DLL, "AdbWinUsbApi.dll" },
+        { SC_RES_ID_SCRCPY_SERVER,   "scrcpy-server" },
     };
 
     char dest[MAX_PATH];
@@ -301,7 +301,7 @@ scrcpyw_extract_embedded_binaries(void) {
             MessageBoxA(NULL, "Path too long.", "scrcpy", MB_ICONERROR);
             return false;
         }
-        if (!extract_resource_to_file(items[i].res, dest)) {
+        if (!extract_resource_to_file(items[i].res_id, dest)) {
             char msg[256];
             snprintf(msg, sizeof(msg), "Could not extract %s.", items[i].name);
             MessageBoxA(NULL, msg, "scrcpy", MB_ICONERROR);
