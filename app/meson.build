@@ -88,7 +88,7 @@ if host_machine.system() == 'windows'
     # (embeds adb.exe + scrcpy-server for single-file distribution).
     scrcpy_rc = windows.compile_resources('scrcpy-windows.rc')
     scrcpyw_rc = windows.compile_resources('scrcpy-windows.rc',
-                                           extra_args: ['--define', 'SCRCPYW'])
+                                           args: ['--define', 'SCRCPYW'])
     feature_test_macros += [
         '-D_WIN32_WINNT=0x0600',
         '-DWINVER=0x0600',
