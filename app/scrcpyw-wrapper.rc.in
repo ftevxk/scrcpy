@@ -1,0 +1,9 @@
+// Wrapper resource file for scrcpyw.exe (SCRCPYW build).
+// This file is processed by configure_file() to produce scrcpyw-wrapper.rc
+// in the build directory, then compiled by windows.compile_resources() with
+// --define SCRCPYW. It does nothing except #include the real rc file via an
+// absolute path injected by meson (@SRCDIR@), so windres resolves
+// "data/icon.ico" and the embedded RCDATA binaries relative to the original
+// scrcpy-windows.rc location. compile_resources() sees a distinct source
+// file name and does not collide with the scrcpy.exe target.
+#include "@SRCDIR@/scrcpy-windows.rc"

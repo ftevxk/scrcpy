@@ -87,24 +87,21 @@ if host_machine.system() == 'windows'
     # (no embedded binaries, smaller), once with SCRCPYW for scrcpyw.exe
     # (embeds adb.exe + scrcpy-server for single-file distribution).
     # compile_resources() names its target after the source file, so two
-    # calls with the same rc file conflict. For the SCRCPYW variant we use
-    # a custom_target so we can give it a distinct output object name while
-    # still running windres with the original source (so that "data/icon.ico"
-    # and other paths inside the rc file resolve relative to app/).
+    # calls with the same rc file conflict. For the SCRCPYW variant we
+    # generate a wrapper rc that #includes the original via a relative path,
+    # so windres resolves data/icon.ico etc. relative to the original file's
+    # location (app/). compile_resources then picks the correct architecture
+    # windres via the cross file's windres entry.
     scrcpy_rc = windows.compile_resources('scrcpy-windows.rc')
-    windres_prog = find_program('x86_64-w64-mingw32-windres', required: false)
-    if not windres_prog.found()
-      windres_prog = find_program('i686-w64-mingw32-windres', required: false)
-    endif
-    if not windres_prog.found()
-      windres_prog = find_program('windres', required: true)
-    endif
-    scrcpyw_rc = custom_target('scrcpyw-windows',
-                               input: 'scrcpy-windows.rc',
-                               output: 'scrcpyw-windows.o',
-                               command: [windres_prog,
-                                         '--define', 'SCRCPYW',
-                                         '@INPUT@', '@OUTPUT@'])
+    scrcpyw_wrapper_conf = configuration_data()
+    scrcpyw_wrapper_conf.set('SRCDIR', meson.current_source_dir())
+    scrcpyw_wrapper = configure_file(
+        input: 'scrcpyw-wrapper.rc.in',
+        output: 'scrcpyw-wrapper.rc',
+        configuration: scrcpyw_wrapper_conf
+    )
+    scrcpyw_rc = windows.compile_resources(scrcpyw_wrapper,
+                                           args: ['--define', 'SCRCPYW'])
     feature_test_macros += [
         '-D_WIN32_WINNT=0x0600',
         '-DWINVER=0x0600',
