@@ -82,8 +82,13 @@ if host_machine.system() == 'windows'
         'src/util/command.c',
         'src/sys/win/file.c',
         'src/sys/win/process.c',
-        windows.compile_resources('scrcpy-windows.rc'),
     ]
+    # Compile the resource file twice: once without SCRCPYW for scrcpy.exe
+    # (no embedded binaries, smaller), once with SCRCPYW for scrcpyw.exe
+    # (embeds adb.exe + scrcpy-server for single-file distribution).
+    scrcpy_rc = windows.compile_resources('scrcpy-windows.rc')
+    scrcpyw_rc = windows.compile_resources('scrcpy-windows.rc',
+                                           extra_args: ['--define', 'SCRCPYW'])
     feature_test_macros += [
         '-D_WIN32_WINNT=0x0600',
         '-DWINVER=0x0600',
@@ -93,6 +98,8 @@ else
         'src/sys/unix/file.c',
         'src/sys/unix/process.c',
     ]
+    scrcpy_rc = []
+    scrcpyw_rc = []
     if host_machine.system() == 'darwin'
         feature_test_macros += '-D_DARWIN_C_SOURCE'
     endif
@@ -190,13 +197,13 @@ configure_file(configuration: conf, output: 'config.h')
 
 src_dir = include_directories('src')
 
-executable('scrcpy', src,
+executable('scrcpy', src + scrcpy_rc,
            dependencies: dependencies,
            include_directories: src_dir,
            install: true,
            c_args: [])
 
-executable('scrcpyw', src,
+executable('scrcpyw', src + scrcpyw_rc,
            dependencies: dependencies,
            include_directories: src_dir,
            install: true,

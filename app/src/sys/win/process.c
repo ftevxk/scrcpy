@@ -144,10 +144,21 @@ sc_process_execute_p(const char *const argv[], HANDLE *handle, unsigned flags,
     if (handle_count > 0) {
         dwCreationFlags |= EXTENDED_STARTUPINFO_PRESENT;
     }
+#ifdef SCRCPYW
+    // scrcpyw is a Windows GUI subsystem binary with no console. Without this
+    // flag, every console-mode child (adb.exe, app_process via adb shell) gets
+    // a fresh console window allocated by Windows, causing the black panel
+    // flashing on every adb invocation. CREATE_NO_WINDOW prevents that while
+    // still allowing stdio redirection via pipes to work normally.
+    // (CREATE_NO_WINDOW is incompatible with DETACHED_PROCESS, so we use it as
+    // the sole mechanism under SCRCPYW.)
+    dwCreationFlags |= CREATE_NO_WINDOW;
+#else
     if (!inherit_stdout && !inherit_stderr) {
         // DETACHED_PROCESS to disable stdin, stdout and stderr
         dwCreationFlags |= DETACHED_PROCESS;
     }
+#endif
     BOOL ok = CreateProcessW(NULL, wide, NULL, NULL, bInheritHandles,
                              dwCreationFlags, NULL, NULL, &si.StartupInfo, &pi);
     free(wide);

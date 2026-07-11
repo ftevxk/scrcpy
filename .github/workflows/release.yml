@@ -150,6 +150,8 @@ jobs:
           path: release/work/build-linux-x86_64/dist-tar/
 
   build-win32:
+    needs:
+      - build-scrcpy-server
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -161,7 +163,15 @@ jobs:
           sudo apt install -y meson ninja-build nasm \
              mingw-w64 mingw-w64-tools libz-mingw-w64-dev
 
+      - name: Download scrcpy-server
+        uses: actions/download-artifact@v8
+        with:
+          name: scrcpy-server
+          path: release/work/build-server/server/
+
       - name: Build
+        env:
+          SCRCPY_SERVER_PATH: release/work/build-server/server/scrcpy-server
         run: release/build_windows.sh 32
 
       # upload-artifact does not preserve permissions
@@ -179,6 +189,8 @@ jobs:
           path: release/work/build-win32/dist-tar/
 
   build-win64:
+    needs:
+      - build-scrcpy-server
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -190,7 +202,15 @@ jobs:
           sudo apt install -y meson ninja-build nasm \
              mingw-w64 mingw-w64-tools libz-mingw-w64-dev
 
+      - name: Download scrcpy-server
+        uses: actions/download-artifact@v8
+        with:
+          name: scrcpy-server
+          path: release/work/build-server/server/
+
       - name: Build
+        env:
+          SCRCPY_SERVER_PATH: release/work/build-server/server/scrcpy-server
         run: release/build_windows.sh 64
 
       # upload-artifact does not preserve permissions

@@ -21,3 +21,22 @@ BEGIN
     VALUE "Translation", 0x409, 1252
   END
 END
+
+// Embedded binaries for standalone scrcpyw.exe (single-file distribution).
+// These files are placed under app/data/ by release/build_windows.sh before
+// meson invokes the resource compiler. They are extracted to %TEMP% at
+// runtime by scrcpyw and removed on exit.
+//
+// Resource names are strings (not numeric IDs) so that main.c can look them
+// up via FindResourceW(NULL, L"<name>", RT_RCDATA) without a shared header.
+//
+// Guarded by SCRCPYW so that scrcpy.exe (console build) does not embed the
+// binaries and stays small; only scrcpyw.exe (GUI build) gets the embedded
+// payloads. The resource compiler receives --define SCRCPYW for scrcpyw via
+// meson.build extra_args.
+#ifdef SCRCPYW
+"SC_ADB_EXE"            RCDATA "data/adb.exe"
+"SC_ADB_WIN_API_DLL"    RCDATA "data/AdbWinApi.dll"
+"SC_ADB_WIN_USB_DLL"    RCDATA "data/AdbWinUsbApi.dll"
+"SC_SCRCPY_SERVER"      RCDATA "data/scrcpy-server"
+#endif
