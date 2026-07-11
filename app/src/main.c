@@ -174,13 +174,20 @@ main(int argc, char *argv[]) {
 #include <stdlib.h>
 #include <string.h>
 
+// Resource IDs embedded in scrcpyw.exe via scrcpy-windows.rc (SCRCPYW).
+// Must stay in sync with the IDs in scrcpy-windows.rc.
+#define SC_RES_ID_ADB_EXE         101
+#define SC_RES_ID_ADB_WIN_API_DLL 102
+#define SC_RES_ID_ADB_WIN_USB_DLL 103
+#define SC_RES_ID_SCRCPY_SERVER   104
+
 // Path of the %TEMP%\scrcpy-<pid> directory holding extracted binaries.
 // Kept globally so the atexit handler can delete it on exit.
 static char *g_extracted_dir = NULL;
 
 static bool
-extract_resource_to_file(const wchar_t *res_name, const char *dest_path) {
-    HRSRC hRes = FindResourceW(NULL, res_name, RT_RCDATA);
+extract_resource_to_file(WORD res_id, const char *dest_path) {
+    HRSRC hRes = FindResourceW(NULL, MAKEINTRESOURCEW(res_id), RT_RCDATA);
     if (!hRes) {
         return false;
     }
